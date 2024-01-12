@@ -1,4 +1,60 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    $host = "localhost";
+    $username = "root";
+    $password = "";
+    $database = "auth";
+    $table = "register";
+    $port="3307";
 
+    $conn = new mysqli($host, $username, $password, $database, $port);
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $phone = $_POST["phone"];
+    $password = $_POST["password"];
+    $address = $_POST["address"];
+    $dob = $_POST["dob"];
+
+    $emailCheckQuery = "SELECT * FROM $table WHERE email = '$email'";
+    $result = $conn->query($emailCheckQuery);
+
+    if ($result->num_rows > 0) {
+        echo "Error: Email already exists. Please choose a different email.";
+        $conn->close();
+        exit();
+    }
+
+    // if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z_]+[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
+    //     echo "Invalid email format";
+    //     $conn->close();
+    //     exit();
+    // }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
+        echo "Invalid email format";
+        $conn->close();
+        exit();
+    }
+
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    $sql = "INSERT INTO $table (name, email, phone, password, address, dob) VALUES ('$name', '$email', '$phone', '$hashedPassword', '$address', '$dob')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "Registration successful!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+
+    $conn->close();
+}
+?>
 
 
 
