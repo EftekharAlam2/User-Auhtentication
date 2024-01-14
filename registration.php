@@ -6,9 +6,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = "";
     $database = "auth";
     $table = "register";
-    $port="3307";
 
-    $conn = new mysqli($host, $username, $password, $database, $port);
+    $conn = new mysqli($host, $username, $password, $database);
 
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
