@@ -10,8 +10,9 @@ $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "auth";
+$port = "3307";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -138,8 +139,56 @@ $conn->close();
         </div>
     </div>
 
-    
-    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Address</th>
+                <th>Date of Birth</th>
+                <th>Gender</th>
+                <th>Image</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        <?php
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "auth";
+            $port = "3307";
+            
+            $conn = new mysqli($servername, $username, $password, $dbname, $port);
+            
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
+
+            $result = $conn->query("SELECT * FROM employee_info");
+
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>{$row['name']}</td>";
+                echo "<td>{$row['email']}</td>";
+                echo "<td>{$row['number']}</td>";
+                echo "<td>{$row['address']}</td>";
+                echo "<td>{$row['dob']}</td>";
+                echo "<td>{$row['gender']}</td>";
+                echo "<td><img src='images/{$row['image']}' style='max-width: 100px; max-height: 100px;'></td>";
+                echo "<td>
+                        <a href='edit.php?id={$row['id']}' class='btn btn-warning btn-sm'>Edit</a>
+                        <a href='delete.php?id={$row['id']}' class='btn btn-danger btn-sm'>Delete</a>
+                      </td>";
+                echo "</tr>";
+            }
+            
+        ?>
+
+        </tbody>
+    </table>
 
     <form method="post" action="logout.php">
         <button class="btn btn-info" type="submit" name="logout">Logout</button>
