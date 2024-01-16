@@ -17,57 +17,114 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// if ($_SERVER["REQUEST_METHOD"] == "POST") {
+//     $name = $_POST["name"];
+//     $email = $_POST["email"];
+//     $number = $_POST["number"];
+//     $address = $_POST["address"];
+//     $dob = $_POST["dob"];
+//     $gender = $_POST["gender"];
+//     $image = $_FILES["image"]["name"];
+//     $temp = $_FILES["image"]["tmp_name"]; 
+//     $file = "images/" . $image;
+
+//     move_uploaded_file($temp, $file);
+
+//     if (!preg_match('/^[a-zA-Z ]+$/', $name)) {
+//         echo "Invalid name format. Name should contain only letters and spaces.";
+//         $conn->close();
+//         exit();
+//     }
+
+//     if (!is_numeric($number)) {
+//         echo "Invalid phone number format. Please enter only numeric characters.";
+//         $conn->close();
+//         exit();
+//     }
+
+//     if ($result->num_rows > 0) {
+//         echo "Error: Email already exists. Please choose a different email.";
+//         $conn->close();
+//         exit();
+//     }
+
+//     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
+//         echo "Invalid email format";
+//         $conn->close();
+//         exit();
+//     }
+
+//     $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
+//             VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
+
+//     if ($conn->query($sql) === TRUE) {
+//         header("Location: home.php");
+//     } else {
+//         echo "Error: " . $sql . "<br>" . $conn->error;
+//     }
+// }
+
+// $conn->close();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST["name"];
-    $email = $_POST["email"];
-    $number = $_POST["number"];
-    $address = $_POST["address"];
-    $dob = $_POST["dob"];
-    $gender = $_POST["gender"];
-    $image = $_FILES["image"]["name"];
-    $temp = $_FILES["image"]["tmp_name"]; 
-    $file = "images/" . $image;
+    if (isset($_POST["submit"])) {
+        $nameArray = $_POST["name"];
 
-    move_uploaded_file($temp, $file);
+    foreach ($nameArray as $index => $name) {
+        $email = $_POST["email"][$index];
+        $number = $_POST["number"][$index];
+        $address = $_POST["address"][$index];
+        $dob = $_POST["dob"][$index];
+        $gender = $_POST["gender"][$index];
+        $image = $_FILES["image"]["name"][$index];
+        $temp = $_FILES["image"]["tmp_name"][$index];
+        $file = "images/" . $image;
 
+        move_uploaded_file($temp, $file);
 
-    if (!preg_match('/^[a-zA-Z ]+$/', $name)) {
-        echo "Invalid name format. Name should contain only letters and spaces.";
-        $conn->close();
-        exit();
-    }
+        $emailCheckQuery = "SELECT * FROM employee_info WHERE email = '$email'";
+        $result = $conn->query($emailCheckQuery);
 
-    if (!is_numeric($number)) {
-        echo "Invalid phone number format. Please enter only numeric characters.";
-        $conn->close();
-        exit();
-    }
+            if (!preg_match('/^[a-zA-Z ]+$/', $name)) {
+                echo "Invalid name format. Name should contain only letters and spaces.";
+                $conn->close();
+                exit();
+            }
+        
+            if (!is_numeric($number)) {
+                echo "Invalid phone number format. Please enter only numeric characters.";
+                $conn->close();
+                exit();
+            }
+        
+            if ($result->num_rows > 0) {
+                echo "Error: Email already exists. Please choose a different email.";
+                $conn->close();
+                exit();
+            }
+        
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
+                echo "Invalid email format";
+                $conn->close();
+                exit();
+            }
 
-    if ($result->num_rows > 0) {
-        echo "Error: Email already exists. Please choose a different email.";
-        $conn->close();
-        exit();
-    }
+            $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
+                VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
-        echo "Invalid email format";
-        $conn->close();
-        exit();
-    }
+            if ($conn->query($sql) !== TRUE) {
+                echo "Error: " . $sql . "<br>" . $conn->error;
+            }
+        }
 
-    $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
-            VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
-
-    if ($conn->query($sql) === TRUE) {
         header("Location: home.php");
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
     }
 }
 
 $conn->close();
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -91,43 +148,50 @@ $conn->close();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <form method="post" action="" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" name="name" >
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" name="email">
-                </div>
-                <div class="mb-3">
-                    <label for="number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" name="number" >
-                </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" name="address">
-                </div>
-                <div class="mb-3">
-                    <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" name="dob" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Gender</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="male" name="gender" value="Male" required>
-                        <label class="form-check-label" for="male">Male</label>
+            <form method="post" action="home.php" enctype="multipart/form-data">
+                <div id="employeeForms" class="mt-4">
+                    <div class="mb-3">
+                        <label for="name[]" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name[]" >
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="female" name="gender" value="Female" required>
-                        <label class="form-check-label" for="female">Female</label>
+                    <div class="mb-3">
+                        <label for="email[]" class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email[]">
+                    </div>
+                    <div class="mb-3">
+                        <label for="number[]" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" name="number[]" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="address[]" class="form-label">Address</label>
+                        <input type="text" class="form-control" name="address[]">
+                    </div>
+                    <div class="mb-3">
+                        <label for="dob[]" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" name="dob[]">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gender</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="male" name="gender[]" value="Male">
+                            <label class="form-check-label" for="male">Male</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="female" name="gender[]" value="Female" >
+                            <label class="form-check-label" for="female">Female</label>
+                        </div>
+                    </div>
+                    <div class="mb-3 text-center">
+                        <label class="form-label">Employee Image</label>
+                        <input type="file" class="form-control" name="image[]" accept="image/*">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-success" onclick="addEmployeeForm()">Add Another Employee Form</button>
+                        <button type="button" class="btn btn-danger" onclick="removeEmployeeForm()">Remove Form</button>
                     </div>
                 </div>
-                <div class="mb-3 text-center">
-                    <label class="form-label">Employee Image</label>
-                    <input type="file" class="form-control" name="image" accept="image/*">
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary mt-3" name="submit">Submit</button>
+                
             </form>
             </div>
             <div class="modal-footer">
@@ -158,9 +222,8 @@ $conn->close();
             $username = "root";
             $password = "";
             $dbname = "auth";
-            $port = "3307";
             
-            $conn = new mysqli($servername, $username, $password, $dbname, $port);
+            $conn = new mysqli($servername, $username, $password, $dbname);
             
             if ($conn->connect_error) {
                 die("Connection failed: " . $conn->connect_error);
@@ -192,6 +255,69 @@ $conn->close();
     <form method="post" action="logout.php">
         <button class="btn btn-info" type="submit" name="logout">Logout</button>
     </form>
+
+    <script>
+        let formIndex = 0;
+
+        function addEmployeeForm() {
+            formIndex++;
+            const formDiv = document.getElementById("employeeForms");
+
+            const newForm = document.createElement("div");
+            newForm.innerHTML = `
+            <div id="employeeForms" class="mt-4">
+                <div class="mb-3">
+                    <label for="name[]" class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name[]" >
+                </div>
+                <div class="mb-3">
+                    <label for="email[]" class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email[]">
+                </div>
+                <div class="mb-3">
+                    <label for="number[]" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" name="number[]" >
+                </div>
+                <div class="mb-3">
+                    <label for="address[]" class="form-label">Address</label>
+                    <input type="text" class="form-control" name="address[]">
+                </div>
+                <div class="mb-3">
+                    <label for="dob[]" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="dob[]">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="male" name="gender[]" value="Male">
+                        <label class="form-check-label" for="male">Male</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="female" name="gender[]" value="Female" >
+                        <label class="form-check-label" for="female">Female</label>
+                    </div>
+                </div>
+                <div class="mb-3 text-center">
+                    <label class="form-label">Employee Image</label>
+                    <input type="file" class="form-control" name="image[]" accept="image/*">
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-success" onclick="addEmployeeForm()">Add Another Employee Form</button>
+                    <button type="button" class="btn btn-danger" onclick="removeEmployeeForm()">Remove Form</button>
+                </div>
+            </div>
+            `;
+            formDiv.appendChild(newForm);
+        }
+
+        function removeEmployeeForm() {
+            const formDiv = document.getElementById("employeeForms");
+            if (formIndex > 0) {
+                formDiv.removeChild(formDiv.lastChild);
+                formIndex--;
+            }
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -1,6 +1,6 @@
 <?php
 
-$conn = new mysqli('localhost', 'root', '', 'auth', '3307');
+$conn = new mysqli('localhost', 'root', '', 'auth');
 
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
     $employeeId = $_GET['id'];
