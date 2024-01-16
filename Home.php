@@ -17,55 +17,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// if ($_SERVER["REQUEST_METHOD"] == "POST") {
-//     $name = $_POST["name"];
-//     $email = $_POST["email"];
-//     $number = $_POST["number"];
-//     $address = $_POST["address"];
-//     $dob = $_POST["dob"];
-//     $gender = $_POST["gender"];
-//     $image = $_FILES["image"]["name"];
-//     $temp = $_FILES["image"]["tmp_name"]; 
-//     $file = "images/" . $image;
-
-//     move_uploaded_file($temp, $file);
-
-//     if (!preg_match('/^[a-zA-Z ]+$/', $name)) {
-//         echo "Invalid name format. Name should contain only letters and spaces.";
-//         $conn->close();
-//         exit();
-//     }
-
-//     if (!is_numeric($number)) {
-//         echo "Invalid phone number format. Please enter only numeric characters.";
-//         $conn->close();
-//         exit();
-//     }
-
-//     if ($result->num_rows > 0) {
-//         echo "Error: Email already exists. Please choose a different email.";
-//         $conn->close();
-//         exit();
-//     }
-
-//     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
-//         echo "Invalid email format";
-//         $conn->close();
-//         exit();
-//     }
-
-//     $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
-//             VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
-
-//     if ($conn->query($sql) === TRUE) {
-//         header("Location: home.php");
-//     } else {
-//         echo "Error: " . $sql . "<br>" . $conn->error;
-//     }
-// }
-
-// $conn->close();
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["submit"])) {
         $nameArray = $_POST["name"];
@@ -108,6 +59,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $conn->close();
                 exit();
             }
+
+            // if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/', $password)) {
+            //     echo "Password should include at least one lowercase letter, one uppercase letter, one number, and one special character.";
+            //     $conn->close();
+            //     exit();
+            // }
 
             $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
                 VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
@@ -312,7 +269,7 @@ $conn->close();
 
         function removeEmployeeForm() {
             const formDiv = document.getElementById("employeeForms");
-            if (formIndex > 0) {
+            if (formIndex > 1) {
                 formDiv.removeChild(formDiv.lastChild);
                 formIndex--;
             }
