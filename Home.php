@@ -33,48 +33,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         move_uploaded_file($temp, $file);
 
-        $emailCheckQuery = "SELECT * FROM employee_info WHERE email = '$email'";
-        $result = $conn->query($emailCheckQuery);
+        $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
+            VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
 
-            if (!preg_match('/^[a-zA-Z ]+$/', $name)) {
-                echo "Invalid name format. Name should contain only letters and spaces.";
-                $conn->close();
-                exit();
-            }
-        
-            if (!is_numeric($number)) {
-                echo "Invalid phone number format. Please enter only numeric characters.";
-                $conn->close();
-                exit();
-            }
-        
-            if ($result->num_rows > 0) {
-                echo "Error: Email already exists. Please choose a different email.";
-                $conn->close();
-                exit();
-            }
-        
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/', $email)) {
-                echo "Invalid email format";
-                $conn->close();
-                exit();
-            }
-
-            // if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/', $password)) {
-            //     echo "Password should include at least one lowercase letter, one uppercase letter, one number, and one special character.";
-            //     $conn->close();
-            //     exit();
-            // }
-
-            $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
-                VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
-
-            if ($conn->query($sql) !== TRUE) {
-                echo "Error: " . $sql . "<br>" . $conn->error;
-            }
+        if ($conn->query($sql) !== TRUE) {
+            echo "Error: " . $sql . "<br>" . $conn->error;
         }
+    }
 
-        header("Location: home.php");
+    header("Location: home.php");
     }
 }
 
@@ -105,7 +72,7 @@ $conn->close();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <form method="post" action="home.php" enctype="multipart/form-data">
+            <form id="employeeForm" method="post" action="home.php" enctype="multipart/form-data" onsubmit="return validateAndSubmit()">
                 <div id="employeeForms" class="mt-4">
                     <div class="mb-3">
                         <label for="name[]" class="form-label">Name</label>
@@ -130,11 +97,11 @@ $conn->close();
                     <div class="mb-3">
                         <label class="form-label">Gender</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" id="male" name="gender[]" value="Male">
+                            <input class="form-check-input" type="radio" id="male" name="gender[]" value="Male" required>
                             <label class="form-check-label" for="male">Male</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" id="female" name="gender[]" value="Female" >
+                            <input class="form-check-input" type="radio" id="female" name="gender[]" value="Female" required >
                             <label class="form-check-label" for="female">Female</label>
                         </div>
                     </div>
@@ -221,6 +188,7 @@ $conn->close();
             const formDiv = document.getElementById("employeeForms");
 
             const newForm = document.createElement("div");
+            
             newForm.innerHTML = `
             <div id="employeeForms" class="mt-4">
                 <div class="mb-3">
@@ -269,11 +237,206 @@ $conn->close();
 
         function removeEmployeeForm() {
             const formDiv = document.getElementById("employeeForms");
-            if (formIndex > 1) {
+            if (formIndex > 0) {
                 formDiv.removeChild(formDiv.lastChild);
                 formIndex--;
             }
         }
+
+    //     document.addEventListener('DOMContentLoaded', function () {
+    //     document.getElementById('employeeForm').addEventListener('submit', function (event) {
+    //         event.preventDefault(); 
+
+      
+    //         var nameInput = document.querySelector('input[name="name[]"]');
+    //         var emailInput = document.querySelector('input[name="email[]"]');
+    //         var numberInput = document.querySelector('input[name="number[]"]');
+
+    //         var name = nameInput.value.trim();
+    //         var email = emailInput.value.trim();
+    //         var number = numberInput.value.trim();
+
+    //         if (!/^[a-zA-Z ]+$/.test(name)) {
+    //             alert('Invalid name format. Name should contain only letters and spaces.');
+    //             return;
+    //         }
+
+    //         if (!/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/.test(email)) {
+    //             alert('Invalid email format.');
+    //             return;
+    //         }
+
+    //         if (!/^\d+$/.test(number)) {
+    //             alert('Invalid phone number format. Please enter only numeric characters.');
+    //             return;
+    //         }
+
+    //         var emailInputs = document.querySelectorAll('input[name="email[]"]');
+    //         var existingEmails = [];
+
+    //         emailInputs.forEach(function (emailInput) {
+    //         var email = emailInput.value.trim();
+
+    //         if (!/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/.test(email)) {
+    //             alert('Invalid email format: ' + email);
+    //             return;
+    //         }
+
+    //         if (existingEmails.includes(email)) {
+    //             alert('Error: Email ' + email + ' already exists. Please choose a different email.');
+    //             return;
+    //         }
+
+    //         existingEmails.push(email);
+    //     });
+
+    //     var dobInputs = document.querySelectorAll('input[name="dob[]"]');
+
+    //     dobInputs.forEach(function (dobInput) {
+    //         var dob = dobInput.value.trim();
+
+    //         var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    //         if (!dateRegex.test(dob)) {
+    //             alert('Invalid Date of Birth format: ' + dob);
+    //             return;
+    //         }
+            
+    //         var dateTime = new Date(dob);
+    //         if (isNaN(dateTime.getTime())) {
+    //             alert('Invalid Date of Birth format: ' + dob);
+    //             return;
+    //         }
+
+    //         // Add additional age validation if needed
+    //         // var today = new Date();
+    //         // var age = today.getFullYear() - dateTime.getFullYear();
+    //         // if (age < 18) {
+    //         //     alert('You must be at least 18 years old to submit the form.');
+    //         //     return;
+    //         // }
+    //     });
+
+    //     var imageInputs = document.querySelectorAll('input[name="image[]"]');
+
+    //     imageInputs.forEach(function (imageInput) {
+    //         var imageFile = imageInput.files[0];
+
+    //         if (!imageFile) {
+    //             alert('Please select an image for each employee.');
+    //             return;
+    //         }
+    //         var allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    //         if (allowedImageTypes.indexOf(imageFile.type) === -1) {
+    //             alert('Invalid image file type. Please select a JPEG, PNG, or GIF file.');
+    //             return;
+    //         }
+
+    //     });
+
+    //     document.getElementById('employeeForm').submit();
+    //     });
+    // });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('submitBtn').addEventListener('click', function (event) {
+            event.preventDefault();
+            
+            validateAndSubmit();
+        });
+    });
+
+    function validateAndSubmit() {
+        var valid = true;
+
+        var nameInputs = document.querySelectorAll('input[name="name[]"]');
+        var existingEmails = [];
+
+        nameInputs.forEach(function (nameInput) {
+            var name = nameInput.value.trim();
+
+            if (!/^[a-zA-Z ]+$/.test(name)) {
+                alert('Invalid name format: ' + name);
+                valid = false;
+            }
+        });
+
+        var numberInputs = document.querySelectorAll('input[name="number[]"]');
+
+        numberInputs.forEach(function (numberInput) {
+            var number = numberInput.value.trim();
+
+            if (!/^\d+$/.test(number)) {
+                alert('Invalid phone number format. Please enter only numeric characters.');
+                valid = false;
+            }
+
+            if (number.length > 12) {
+                alert('Phone number cannot be more than 12 digits.');
+                valid = false;
+            }
+        });
+
+        var emailInputs = document.querySelectorAll('input[name="email[]"]');
+        var existingEmails = [];
+
+        emailInputs.forEach(function (emailInput) {
+            var email = emailInput.value.trim();
+
+            if (!/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/.test(email)) {
+                alert('Invalid email format: ' + email);
+                valid = false;
+            }
+
+            if (existingEmails.includes(email)) {
+                alert('Error: Email ' + email + ' already exists. Please choose a different email.');
+                valid = false;
+            }
+
+            existingEmails.push(email);
+        });
+
+        var dobInputs = document.querySelectorAll('input[name="dob[]"]');
+
+        dobInputs.forEach(function (dobInput) {
+            var dob = dobInput.value.trim();
+
+            var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(dob)) {
+                alert('Invalid Date of Birth format: ' + dob);
+                valid = false;
+            }
+
+            var dateTime = new Date(dob);
+            if (isNaN(dateTime.getTime())) {
+                alert('Invalid Date of Birth format: ' + dob);
+                valid = false;
+            }
+        });
+
+        var imageInputs = document.querySelectorAll('input[name="image[]"]');
+
+        imageInputs.forEach(function (imageInput) {
+            var imageFile = imageInput.files[0];
+
+            if (!imageFile) {
+                alert('Please select an image for each employee.');
+                valid = false;
+            }
+            var allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (allowedImageTypes.indexOf(imageFile.type) === -1) {
+                alert('Invalid image file type. Please select a JPEG, PNG, or GIF file.');
+                valid = false;
+            }
+        });
+
+        if (!valid) {
+        alert('Validation failed. Please correct the errors before submitting.');
+        return false; 
+    }
+
+    return true;
+      
+    }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
