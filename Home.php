@@ -27,11 +27,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $address = $_POST["address"][$index];
         $dob = $_POST["dob"][$index];
         $gender = $_POST["gender"][$index];
-        $image = $_FILES["image"]["name"][$index];
-        $temp = $_FILES["image"]["tmp_name"][$index];
-        $file = "images/" . $image;
+        $image = base64_encode(file_get_contents($_FILES["image"]["tmp_name"][$index]));
+        // $image = $_FILES["image"]["name"][$index];
+        // $temp = $_FILES["image"]["tmp_name"][$index];
+        // $file = "images/" . $image;
 
-        move_uploaded_file($temp, $file);
+        // move_uploaded_file($temp, $file);
 
         $sql = "INSERT INTO employee_info (name, email, number,  address, dob, gender, image) 
             VALUES ('$name', '$email', '$number', '$address', '$dob', '$gender', '$image')";
@@ -84,7 +85,7 @@ $conn->close();
                     </div>
                     <div class="mb-3">
                         <label for="number[]" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" name="number[]" >
+                        <input type="number" class="form-control" name="number[]" >
                     </div>
                     <div class="mb-3">
                         <label for="address[]" class="form-label">Address</label>
@@ -163,7 +164,13 @@ $conn->close();
                 echo "<td>{$row['address']}</td>";
                 echo "<td>{$row['dob']}</td>";
                 echo "<td>{$row['gender']}</td>";
-                echo "<td><img src='images/{$row['image']}' style='max-width: 100px; max-height: 100px;'></td>";
+                $imageData = base64_decode($row['image']);
+
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $imageType = $finfo->buffer($imageData);
+
+                echo "<td><img src='data:$imageType;base64," . base64_encode($imageData) . "' style='max-width: 100px; max-height: 100px;'></td>";
+                // echo "<td><img src='images/{$row['image']}' style='max-width: 100px; max-height: 100px;'></td>";
                 echo "<td>
                         <a href='edit.php?id={$row['id']}' class='btn btn-warning btn-sm'>Edit</a>
                         <a href='delete.php?id={$row['id']}' class='btn btn-danger btn-sm'>Delete</a>
@@ -201,7 +208,7 @@ $conn->close();
                 </div>
                 <div class="mb-3">
                     <label for="number[]" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" name="number[]" >
+                    <input type="number" class="form-control" name="number[]" >
                 </div>
                 <div class="mb-3">
                     <label for="address[]" class="form-label">Address</label>
